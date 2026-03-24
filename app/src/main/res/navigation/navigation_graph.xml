@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/routineListFragment">
+
+    <fragment
+        android:id="@+id/routineListFragment"
+        android:name="si.uni_lj.fri.pbd.routinetracker.ui.RoutineListFragment"
+        android:label="fragment_routine_list"
+        tools:layout="@layout/fragment_routine_list" >
+        <action
+            android:id="@+id/action_routineListFragment_to_routineDetailsFragment"
+            app:destination="@id/routineDetailsFragment" />
+        <action
+            android:id="@+id/action_routineListFragment_to_addEditRoutineFragment"
+            app:destination="@id/addEditRoutineFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/routineDetailsFragment"
+        android:name="si.uni_lj.fri.pbd.routinetracker.ui.RoutineDetailsFragment"
+        android:label="fragment_routine_details"
+        tools:layout="@layout/fragment_routine_details" >
+        <action
+            android:id="@+id/action_routineDetailsFragment_to_addEditRoutineFragment"
+            app:destination="@id/addEditRoutineFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addEditRoutineFragment"
+        android:name="si.uni_lj.fri.pbd.routinetracker.ui.AddEditRoutineFragment"
+        android:label="fragment_add_edit_routine"
+        tools:layout="@layout/fragment_add_edit_routine" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="si.uni_lj.fri.pbd.routinetracker.ui.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">RoutineTracker</string>
+    <string name="Open">Open</string>
+    <string name="Close">Close</string>
+    <string name="main">This is the main content</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
