@@ -34,6 +34,5 @@
     <fragment
         android:id="@+id/settingsFragment"
         android:name="si.uni_lj.fri.pbd.routinetracker.ui.SettingsFragment"
-        android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        android:label="fragment_settings"/>
 </navigation>

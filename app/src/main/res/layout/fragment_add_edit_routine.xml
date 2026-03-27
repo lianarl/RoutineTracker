@@ -36,21 +36,23 @@
             android:orientation="horizontal"
             android:layout_marginTop="30dp">
 
-            <Button
-                android:id="@+id/addedit_start"
-                android:layout_width="140dp"
-                android:layout_height="60dp"
-                android:text="Select start time"
-                android:layout_marginRight="10dp"
-                />
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/addedit_start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="Start HH:MM"
+                    android:inputType="time"
+                    android:textSize="16dp"
+                    android:layout_marginRight="10dp"/>
 
-            <Button
-                android:id="@+id/addedit_end"
-                android:layout_width="140dp"
-                android:layout_height="60dp"
-                android:text="Select end time"
-                android:layout_marginLeft="10dp"
-                />
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/addedit_end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="End HH:MM"
+                    android:inputType="time"
+                    android:textSize="16dp"
+                    android:layout_marginRight="10dp"/>
 
         </LinearLayout>
 

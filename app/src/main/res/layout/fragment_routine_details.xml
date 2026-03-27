@@ -17,7 +17,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/detailsName"/>
+            android:id="@+id/details_name"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/detailsType"/>
+            android:id="@+id/details_type"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -36,10 +36,32 @@
             android:text="Time"
             android:layout_marginTop="16dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/detailsTime"/>
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/details_time_start"
+                    android:paddingRight="6dp"
+                    />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="6dp"
+                    android:text="-"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/details_time_end"
+                    />
+
+        </LinearLayout>
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -50,7 +72,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/detailsDays"/>
+            android:id="@+id/details_days"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -61,19 +83,19 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/detailsNotif"/>
+            android:id="@+id/details_notif"/>
 
         <Button
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:id="@+id/detailsEdit"
+            android:id="@+id/details_edit"
             android:text="Edit"
             android:layout_marginTop="30dp"/>
 
         <Button
             android:layout_width="120dp"
             android:layout_height="wrap_content"
-            android:id="@+id/detailsDelete"
+            android:id="@+id/details_delete"
             android:text="Delete"
             android:layout_marginTop="10dp"/>
 

@@ -11,7 +11,7 @@ import android.database.Cursor
 
 class DatabaseHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
-    var dbHelper: DatabaseHelper? = null
+    //var dbHelper: DatabaseHelper? = null
 
     companion object {
         const val TAG = "DatabaseHelper"
@@ -40,7 +40,7 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME,
     override fun onCreate(db: SQLiteDatabase?) {
         Log.d(TAG, "onCreate")
 
-        val CREATE_ROUTINES_TABLE = ("CREATE TABLE" + TABLE_ROUTINES + "(" +
+        val CREATE_ROUTINES_TABLE = ("CREATE TABLE " + TABLE_ROUTINES + " (" +
                 _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 ROUTINE_NAME + " TEXT NOT NULL, " +
                 ROUTINE_TYPE + " TEXT NOT NULL, " +
@@ -60,15 +60,15 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME,
     }
 
     fun readAllRoutines(): Cursor? {
-        return dbHelper?.readableDatabase?.query(DatabaseHelper.TABLE_ROUTINES, DatabaseHelper.COLUMNS, null, null, null, null, null)
+        return readableDatabase?.query(DatabaseHelper.TABLE_ROUTINES, DatabaseHelper.COLUMNS, null, null, null, null, null)
     }
 
     fun readOneRoutine(id: Int): Cursor? {
-        return dbHelper?.readableDatabase?.query(DatabaseHelper.TABLE_ROUTINES, DatabaseHelper.COLUMNS, _ID, null, null, null, null)
+        return readableDatabase?.query(DatabaseHelper.TABLE_ROUTINES, DatabaseHelper.COLUMNS, "$_ID = ?", arrayOf(id.toString()), null, null, null)
     }
 
     fun createRoutine(name: String, type: String, startH: Int, startM: Int, endH: Int, endM: Int, days: String, notif: Int): Long {
-        val db = dbHelper?.writableDatabase
+        val db = writableDatabase
         val values = ContentValues().apply {
             put(ROUTINE_NAME, name)
             put(ROUTINE_TYPE, type)
@@ -79,12 +79,12 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME,
             put(ROUTINE_DAYS, days)
             put(ROUTINE_NOTIF, notif)
         }
-        val newRowId = db?.insert(TABLE_ROUTINES, null, values)
-        return newRowId!! // why does !! fix??, i could also just remove the ? from helper and db -> Check this!
+        val newRowId = db.insert(TABLE_ROUTINES, null, values)
+        return newRowId
     }
 
     fun updateRoutine(id: Int, name: String, type: String, startH: Int, startM: Int, endH: Int, endM: Int, days: String, notif: Int): Int {
-        val db = dbHelper?.writableDatabase
+        val db = writableDatabase
         val values = ContentValues().apply {
             put(ROUTINE_NAME, name)
             put(ROUTINE_TYPE, type)
@@ -97,21 +97,21 @@ class DatabaseHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME,
         }
         val selection = "$_ID = ?"
         val selectionArgs = arrayOf(id.toString())
-        val count = db?.update(
+        val count = db.update(
             TABLE_ROUTINES,
             values,
             selection,
             selectionArgs
         )
-        return count!!
+        return count
     }
 
     fun deleteRoutine(id: Int): Int {
-        val db = dbHelper?.writableDatabase
+        val db = writableDatabase
         val selection = "$_ID = ?"
         val selectionArgs = arrayOf(id.toString())
-        val deletedRows = db?.delete(TABLE_ROUTINES, selection, selectionArgs)
-        return deletedRows!!
+        val deletedRows = db.delete(TABLE_ROUTINES, selection, selectionArgs)
+        return deletedRows
     }
 
 }

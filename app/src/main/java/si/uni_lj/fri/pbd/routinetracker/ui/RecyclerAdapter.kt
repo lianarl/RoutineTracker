@@ -3,13 +3,27 @@ package si.uni_lj.fri.pbd.routinetracker
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.database.Cursor
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import si.uni_lj.fri.pbd.routinetracker.databinding.CardLayoutBinding
 import si.uni_lj.fri.pbd.routinetracker.ui.DatabaseHelper
 
-class RecyclerAdapter(private var cursor: Cursor?) : RecyclerView.Adapter<RecyclerAdapter.CardViewHolder>() {
+// implemented viewBinding with RecyclerAdapter using this: https://stackoverflow.com/questions/60423596/how-to-use-viewbinding-in-a-recyclerview-adapter
+// implemented onClickEvents in RecyclerView using this: https://www.quora.com/How-do-I-implement-onClick-event-in-activity-class-in-Recyclerview-in-android
 
-    inner class CardViewHolder(val binding: CardLayoutBinding) : RecyclerView.ViewHolder(binding.root)
+class RecyclerAdapter(private var cursor: Cursor?, private val listener: OnItemClickListener, private val listener2: OnItemLongClickListener) : RecyclerView.Adapter<RecyclerAdapter.CardViewHolder>() {
+
+    interface OnItemClickListener {
+        fun onItemClick(routineId: Int)
+    }
+
+    interface OnItemLongClickListener {
+        fun onItemLongClick(routineId: Int)
+    }
+
+    inner class CardViewHolder(val binding: CardLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
+        // check if it would be better to perform onClick here, as in tutorial
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerAdapter.CardViewHolder {
         val binding = CardLayoutBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -17,12 +31,19 @@ class RecyclerAdapter(private var cursor: Cursor?) : RecyclerView.Adapter<Recycl
     }
 
     override fun getItemCount(): Int {
-        return cursor?.count ?: 0
+        if (cursor != null) {
+            return cursor!!.count
+        } else {
+            return 0
+        }
     }
 
     // accessing data from cursor for a specific position
     override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        if (cursor == null) return
+
+        if (cursor == null) {
+            return
+        }
 
         // move cursor to correct positon and get needed data
         if (!cursor!!.moveToPosition(position)) {
@@ -42,16 +63,20 @@ class RecyclerAdapter(private var cursor: Cursor?) : RecyclerView.Adapter<Recycl
         val start = String.format("%02d:%02d", start_h, start_m)
         val end = String.format("%02d:%02d", end_h, end_m)
 
+        // bind
         holder.binding.routineName.text = routine_name
         holder.binding.routineType.text = routine_type
         holder.binding.routineTime.text = "$start - $end"
         holder.binding.routineDays.text = routine_days
-    }
 
-    // update the cursor
-    fun swapCursor(newCursor: Cursor?) {
-        cursor?.close()
-        cursor = newCursor
-        notifyDataSetChanged()
+        // place the onclick last so i have the routine id -> check if its better to call in CardViewHolder (but then i have to get id there so idk)
+        holder.itemView.setOnClickListener {
+            listener.onItemClick(routine_id)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            listener2.onItemLongClick(routine_id)
+            true
+        }
     }
 }

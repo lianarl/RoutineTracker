@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- No padding option so i just add ugly spacers -->
+    <Preference
+        app:key="..."/>
+    <Preference
+            app:key="..."/>
+
+    <SwitchPreferenceCompat
+            app:key="notifications_key"
+            app:summaryOff="App will not send notifications about upcoming routines"
+            app:summaryOn="App will notify you about upcoming routines"
+            app:title="Enable notifications"/>
+    <EditTextPreference
+            app:key="advanceTime_key"
+            app:title="Set notification advance time"
+            app:summary="How many minutes before the routine is due do you want to be notified?" />
+    <Preference
+            app:title="Reset the app"
+            app:summary="Delete all routines and reset preferences"
+            app:key="reset" />
+</PreferenceScreen>
