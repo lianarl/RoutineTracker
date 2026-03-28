@@ -84,9 +84,10 @@ class MainActivity : AppCompatActivity() {
         // notification setup
         notificationManager = NotificationManagerCompat.from(this)
         // this creates our channel -> Now we can send a notif
-        createChannel(CHANNELID, "DiretReply News", "Example News Channel")
+        createChannel(CHANNELID, "Routine Notifications", "Upcoming routine")
         //handleIntent() // it is called here because a call for intent will create a new main activity, so we can handle intent that was fired from this notif
-        sendNotification(binding.root)
+        //sendNotification(binding.root)
+        makeRequest()
     }
 
     // TODO: create notification channel, if SDK>=26 L8M40
@@ -173,7 +174,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Permission was denied")
         } else {
             Log.d(TAG, "Permission was granted")
-            handleSending()
+            //handleSending()
         }
     }
 
