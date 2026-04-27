@@ -99,6 +99,25 @@
             android:text="Delete"
             android:layout_marginTop="10dp"/>
 
+        <!-- recycler for routine history -->
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="History"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:paddingTop="20dp"
+                />
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="80dp"/>
+
+
     </LinearLayout>
 
 </ScrollView>

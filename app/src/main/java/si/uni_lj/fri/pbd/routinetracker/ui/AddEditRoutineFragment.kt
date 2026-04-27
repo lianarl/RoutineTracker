@@ -1,6 +1,9 @@
 package si.uni_lj.fri.pbd.routinetracker.ui
 
-import android.app.TimePickerDialog
+import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,15 +11,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import si.uni_lj.fri.pbd.routinetracker.R
+import androidx.preference.PreferenceManager
+import kotlinx.coroutines.launch
+import si.uni_lj.fri.pbd.routinetracker.data.entity.Routine
 import si.uni_lj.fri.pbd.routinetracker.databinding.FragmentAddEditRoutineBinding
+import si.uni_lj.fri.pbd.routinetracker.repository.RoutineRepository
+import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineDetailViewModel
+import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineDetailViewModelFactory
 
 class AddEditRoutineFragment : Fragment() {
     private lateinit var binding: FragmentAddEditRoutineBinding
-    private var databaseHelper: DatabaseHelper? = null
+    private lateinit var viewModel: RoutineDetailViewModel // will use the same one for details and addedit (as they are quite similar)
 
-    // times placeholder (i fill them in later)
+    // times declarations (i fill them in later)
     private var startH = 0
     private var startM = 0
     private var endH = 0
@@ -29,31 +39,35 @@ class AddEditRoutineFragment : Fragment() {
     ): View? {
         binding = FragmentAddEditRoutineBinding.inflate(inflater, container, false)
 
-        databaseHelper = DatabaseHelper(requireContext())
+        // viewModel setup
+        val repository = RoutineRepository.getInstance(requireContext())
+        val factory = RoutineDetailViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[RoutineDetailViewModel::class.java]
 
+        // ill just do it the same way it was done in the labs
+        listenerSetup()
         enableChooseType()
 
-        // check if the routine exists, if not -> fill in the existing routine details
+        // check if we edit or add
         val id = arguments?.getInt("routineId")
-        if (id != null) {
-            fillIn(id)
-        }
+        observerSetup(id)
 
-        // enable the save button
-        binding.addeditSave.setOnClickListener {
-            saveRoutine()
-            // go back home
-            findNavController().navigateUp()
-        }
         return binding.root
     }
 
-    // check this
+    // setup of the spinner
+    // src: https://developer.android.com/develop/ui/views/components/spinner
     private fun enableChooseType() {
         val types = arrayOf("Study", "Exercise", "Socialize")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, types)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.addeditType.adapter = adapter
+    }
+
+    private fun listenerSetup() {
+        binding.addeditSave.setOnClickListener {
+            saveRoutine()
+        }
     }
 
     private fun saveRoutine() {
@@ -134,42 +148,66 @@ class AddEditRoutineFragment : Fragment() {
             notif = 1
         }
 
-        // check if it exists and appropriately handle (use the bundle)
+        // build the routine because now we need the object for insertRoutine
+        val routine = Routine()
+        routine.name = routineName
+        routine.type = routineType
+        routine.startH = startH
+        routine.startM = startM
+        routine.endH = endH
+        routine.endM = endM
+        routine.days = routineDays
+        routine.notif = notif
+
+        // check if the routine exists and appropriately handle
         val id = arguments?.getInt("routineId")
-        if (id != null) {
-            databaseHelper?.updateRoutine(id, routineName, routineType, startH, startM, endH, endM, routineDays, notif)
-        } else {
-            databaseHelper?.createRoutine(routineName, routineType, startH, startM, endH, endM, routineDays, notif)
+
+
+// from the lectures couroutine example i use lifecycleScope
+        lifecycleScope.launch {
+            if (id != null) {
+                // here i update (by id)
+                routine.id = id
+                viewModel.updateRoutine(routine)
+                if (notif == 1) {
+                    alarm(id, routineName, startH, startM)
+                }
+            } else {
+                // here i create a new routine
+                val new = viewModel.insertRoutine(routine)
+                if (notif == 1) {
+                    alarm(new.toInt(), routineName, startH, startM)
+                }
+            }
+            findNavController().navigateUp() // go home
         }
     }
 
-    private fun fillIn(id: Int) {
-        val cursor = databaseHelper?.readOneRoutine(id)
-        if (cursor == null || !cursor.moveToFirst()) {
-            cursor?.close()
-            return
-        }
+    // function that fills the info of already created routines when editing them
+    private fun fillIn(routine: Routine) {
 
-        val routine_name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ROUTINE_NAME))
-        binding.addeditName.setText(routine_name)
+        binding.addeditName.setText(routine.name)
 
         // find position of the type and set the spinner to correct position (of that type)
-        val type = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ROUTINE_TYPE))
+        val type = routine.type
         val adapter = binding.addeditType.adapter as ArrayAdapter<String> // shortcut so i dont have to loop through the types
         val position = adapter.getPosition(type)
         binding.addeditType.setSelection(position)
 
         // fill time
-        startH = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.START_H))
-        startM = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.START_M))
-        endH = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.END_H))
-        endM = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.END_M))
+        startH = routine.startH
+        startM = routine.startM
+        endH = routine.endH
+        endM = routine.endM
 
         binding.addeditStart.setText("%02d:%02d".format(startH, startM))
         binding.addeditEnd.setText("%02d:%02d".format(endH, endM))
 
         // fill days
-        val routine_days = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ROUTINE_DAYS))
+        var routine_days = ""
+        if (!routine.days.isNullOrBlank()) {
+            routine_days = routine.days!!
+        }
 
         if (routine_days.contains("Mon")) {
             binding.cbMon.isChecked = true
@@ -193,14 +231,57 @@ class AddEditRoutineFragment : Fragment() {
             binding.cbSun.isChecked = true
         }
 
-        // fil notif
-        val notif = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.ROUTINE_NOTIF))
+        // fill notification
+        val notif = routine.notif
         if (notif == 1) {
             binding.addeditNotif.isChecked = true
         } else {
             binding.addeditNotif.isChecked = false
         }
+    }
 
-        cursor.close()
+    // function for notification scheduling
+    // src: https://developer.android.com/reference/android/app/AlarmManager, https://mubaraknative.medium.com/creating-a-alarm-using-alarmmanager-in-android-e27a4283d39f
+    @SuppressLint("ScheduleExactAlarm")
+    private fun alarm(id: Int, name: String, h: Int, m: Int) {
+
+        val advance1 = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        val advance2 = advance1.getString("advanceTime_key", "1")
+
+        val intent = Intent(requireContext(), MyBroadcastReceiver::class.java)
+        intent.putExtra("routineId", id)
+        intent.putExtra("routineName", name)
+
+        val resultPendingIntent = PendingIntent.getBroadcast(
+            requireContext(), id, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // calendar setup
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, h)
+        calendar.set(java.util.Calendar.MINUTE, m)
+        calendar.set(java.util.Calendar.SECOND, 0)
+
+        // subract advance time so we notify early enough
+        val advance3 = advance2?.toInt()
+        calendar.add(java.util.Calendar.MINUTE, -advance3!!)
+
+        val alarmManager = requireContext().getSystemService(
+            android.content.Context.ALARM_SERVICE
+        ) as? AlarmManager
+
+        alarmManager?.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, resultPendingIntent)
+    }
+
+    private fun observerSetup(id: Int?) {
+        if (id != null) {
+            viewModel.getRoutineById(id)
+                .observe(viewLifecycleOwner) { routine ->
+                    if (routine != null) { // a check so it doesnt force me to use !!
+                        fillIn(routine)
+                    }
+                }
+        }
     }
 }

@@ -4,64 +4,77 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/card_view"
-    android:layout_margin="5dp"
-    app:cardBackgroundColor="#81C784"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="3dp"
+    android:layout_margin="20dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
     app:contentPadding="4dp"
     android:foreground="?selectableItemBackground"
     android:clickable="true">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_centerInParent="true">
+            android:padding="16dp">
 
-            <TextView
+        <TextView
                 android:id="@+id/routine_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="25sp"
+                android:layout_alignParentStart="true"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:layout_gravity="center_horizontal"
-                android:text="Routine Name" />
+                android:textColor="#000000"
+                android:text="Routine name"
+                />
 
-            <TextView
+        <TextView
+                android:id="@+id/routine_completed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignBaseline="@id/routine_name"
+                android:textColor="#3B9BFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:text="Completed"
+                />
+
+        <TextView
                 android:id="@+id/routine_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:layout_marginTop="4dp"
-                android:layout_gravity="center_horizontal"
-                android:text="Routine Type" />
+                android:textSize="14sp"
+                android:layout_below="@id/routine_name"
+                android:layout_alignParentStart="true"
+                android:text="Type"
+                />
 
-            <TextView
+        <TextView
                 android:id="@+id/routine_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:layout_marginTop="2dp"
-                android:layout_gravity="center_horizontal"
-                android:text="10:00 - 12:00" />
+                android:layout_below="@id/routine_type"
+                android:layout_alignParentStart="true"
+                android:textSize="14sp"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp"
+                android:text="12:00 - 13:00"
+                />
 
-            <TextView
+        <TextView
                 android:id="@+id/routine_days"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
-                android:layout_marginTop="2dp"
-                android:layout_gravity="center_horizontal"
-                android:text="Mon, Wed, Fri" />
-
-        </LinearLayout>
+                android:layout_below="@id/routine_type"
+                android:layout_marginTop="6dp"
+                android:layout_alignParentEnd="true"
+                android:textSize="14sp"
+                android:textColor="#000000"
+                android:text="Mon, Fri"
+                />
 
     </RelativeLayout>
+
 </androidx.cardview.widget.CardView>
-
-
-<!-- Padding top in RL sets where the text is going to be! -->

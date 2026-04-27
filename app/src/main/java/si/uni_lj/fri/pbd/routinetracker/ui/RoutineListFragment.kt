@@ -6,21 +6,29 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import si.uni_lj.fri.pbd.routinetracker.R
 import si.uni_lj.fri.pbd.routinetracker.RecyclerAdapter
 import si.uni_lj.fri.pbd.routinetracker.databinding.FragmentRoutineListBinding
+import si.uni_lj.fri.pbd.routinetracker.repository.RoutineRepository
+import si.uni_lj.fri.pbd.routinetracker.util.RoutineEvaluationWorker
+import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineListViewModel
+import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineListViewModelFactory
+import kotlin.collections.emptyList
+
+// check lecture example for Worker + slides
+// for periodic request check https://stackoverflow.com/questions/50363541/schedule-a-work-on-a-specific-time-with-workmanager
 
 class RoutineListFragment : Fragment(), RecyclerAdapter.OnItemClickListener, RecyclerAdapter.OnItemLongClickListener {
-
     private lateinit var binding: FragmentRoutineListBinding
-    private var recyclerView : RecyclerView? = null
-    private var layoutManager : RecyclerView.LayoutManager? = null
     private var adapter : RecyclerAdapter? = null
-    private var databaseHelper : DatabaseHelper? = null
+
+    // viewModel instantiation -> it stores the data put in the xml field and enables to fetch data
+    private lateinit var viewModel: RoutineListViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,21 +38,31 @@ class RoutineListFragment : Fragment(), RecyclerAdapter.OnItemClickListener, Rec
 
         binding = FragmentRoutineListBinding.inflate(inflater, container, false)
 
-        // database setup
-        databaseHelper = DatabaseHelper(requireContext())
+        // viewModel setup
+        val repository = RoutineRepository.getInstance(requireContext())
+        val factory = RoutineListViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, factory)[RoutineListViewModel::class.java]
 
-        // recyclerview setup
-        binding.recyclerView.layoutManager = LinearLayoutManager(binding.root.context)
-        loadRoutines()
-
-        //adapter = RecyclerAdapter(null, this, this)
-        //binding.recyclerView.adapter = adapter
+        // change the RecyclerView and Adapter setup to this from labs, because it does it better
+        recyclerSetup()
+        // observer setup (also from labs implementation)
+        observerSetup()
 
         // button for adding routines
         binding.addRoutine.setOnClickListener {
-
             // got to addEdit
             findNavController().navigate(R.id.action_routineListFragment_to_addEditRoutineFragment)
+        }
+
+        val workManager = WorkManager.getInstance(requireContext())
+
+        // button for running a worker
+        binding.runWorker.setOnClickListener {
+            // one time worker
+            val request = OneTimeWorkRequest.Builder(RoutineEvaluationWorker::class.java).build()
+
+            // enqueue request like in example
+            workManager.enqueue(request)
         }
 
         return binding.root
@@ -58,14 +76,13 @@ class RoutineListFragment : Fragment(), RecyclerAdapter.OnItemClickListener, Rec
         findNavController().navigate(R.id.action_routineListFragment_to_routineDetailsFragment, passId)
     }
 
-    // alertDialog: https://developer.android.com/develop/ui/views/components/dialogs
+    // long click functionality -> aler    // long click functionality -> alertDialog: https://developer.android.com/develop/ui/views/components/dialogstDialog: https://developer.android.com/develop/ui/views/components/dialogs
     override fun onItemLongClick(routineId: Int) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
             .setMessage("Do you want to delete this routine?")
             .setPositiveButton("Yes") { dialog, id ->
-                databaseHelper?.deleteRoutine(routineId)
-                loadRoutines()
+                viewModel.deleteRoutine(routineId)
             }
             .setNegativeButton("No") { dialog, id ->
                 dialog.dismiss()
@@ -74,20 +91,23 @@ class RoutineListFragment : Fragment(), RecyclerAdapter.OnItemClickListener, Rec
         dialog.show()
     }
 
-    private fun loadRoutines() {
-        val cursor = databaseHelper?.readAllRoutines()
-        adapter = RecyclerAdapter(cursor, this, this)
-        binding.recyclerView.adapter = adapter
+    private fun recyclerSetup() {
+        adapter = RecyclerAdapter(emptyList(), this, this)
+        val recyclerView = binding.recyclerView
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = adapter
     }
 
+    // setup one observer per LiveData
+    private fun observerSetup() {
+        viewModel.allRoutines
+            .observe(viewLifecycleOwner) { routines ->
+                viewModel.getCompletionInfo(routines)
+            }
 
-    override fun onResume() {
-        super.onResume()
-        loadRoutines()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        databaseHelper = null
+        viewModel.routinesWithCompletion
+            .observe(viewLifecycleOwner) { routinesAndComp ->
+                adapter?.setRoutineList(routinesAndComp)
+            }
     }
 }

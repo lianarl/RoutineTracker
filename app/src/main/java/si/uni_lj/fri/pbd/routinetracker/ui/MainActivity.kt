@@ -1,35 +1,29 @@
 package si.uni_lj.fri.pbd.routinetracker.ui
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import si.uni_lj.fri.pbd.routinetracker.R
-import android.widget.Toast
 import android.view.MenuItem
-import android.view.View
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.RemoteInput
-import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
-import com.google.android.material.navigation.NavigationView
 import si.uni_lj.fri.pbd.routinetracker.databinding.ActivityMainBinding
 import android.Manifest
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
+import si.uni_lj.fri.pbd.routinetracker.util.RoutineEvaluationWorker
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -88,9 +82,15 @@ class MainActivity : AppCompatActivity() {
         //handleIntent() // it is called here because a call for intent will create a new main activity, so we can handle intent that was fired from this notif
         //sendNotification(binding.root)
         makeRequest()
+        notificationClicked()
+
+        // schedule the worker every hour and enque
+        val workManager = WorkManager.getInstance(this)
+        val requestPeriodic = PeriodicWorkRequest.Builder(RoutineEvaluationWorker::class.java, 1, TimeUnit.HOURS).build()
+        workManager.enqueueUniquePeriodicWork("RoutineWorkerPeriodic", ExistingPeriodicWorkPolicy.KEEP, requestPeriodic)
     }
 
-    // TODO: create notification channel, if SDK>=26 L8M40
+    // create notification channel, if SDK>=26 L8M40 (Lecture 8, minute 40)
     private fun createChannel(id: String, name: String, desc: String) {
         // create notif channel if sdk >= 26
         if (Build.VERSION.SDK_INT>=26) {
@@ -105,64 +105,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // TODO: handle notification (with action) sending
-
-    @SuppressLint("MissingPermission")
-    fun handleSending() {
-
-        //val resultIntent = Intent(this, MainActivity::class.java)
-
-        //val resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
-
-        //val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel("Enter your reply here").build()
-
-        //val replyAction = NotificationCompat.Action.Builder(android.R.drawable.ic_dialog_info, "Reply", resultPendingIntent).addRemoteInput(remoteInput).build()
-
-        val newMessageNotification = NotificationCompat.Builder(this, CHANNELID)
-            .setColor(Color.YELLOW)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("My notification")
-            .setContentText("This allows your feedback")
-            //.addAction(replyAction)
-            .build() // this creates the notif
-
-        // send notif
-        notificationManager?.notify(NOTIFICATIONID, newMessageNotification)
-    }
-
-    fun sendNotification(view: View){
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.d(TAG, "Permission to post notification denied")
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.POST_NOTIFICATIONS)){
-
-                val builder = AlertDialog.Builder(this)
-                with(builder){
-                    //setMessage("If you don't enable this, you won't receive up-to-date info from this app!")
-                    //setTitle("Permission I really need")
-                    setPositiveButton("OK") {
-                        p0, p1->
-                        makeRequest()
-                    }
-                }
-
-                val dialog = builder.create()
-                dialog.show()
-
-            } else {
-                makeRequest()
-            }
-
-        } else {
-            handleSending()
-        }
-    }
-
+    // functions for permissions
     private fun makeRequest() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), NOTIF_REQUEST_CODE)
     }
@@ -174,38 +117,43 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Permission was denied")
         } else {
             Log.d(TAG, "Permission was granted")
-            //handleSending()
         }
     }
 
-    /*
-    // TODO: handle the notif intent and update UI
-    @SuppressLint("MissingPermission")
-    private fun handleIntent() {
-        // query the intent that started this activity
-        val remoteInput = RemoteInput.getResultsFromIntent(intent)
-        if (remoteInput != null) {
-            val inputString = remoteInput.getCharSequence(KEY_TEXT_REPLY).toString()
-            binding.textView.text = inputString // we show it in the text view (creat the xml)
+    // if the user clicked the notification, the app ones at details
+    private fun notificationClicked() {
+        val id = intent?.getIntExtra("routineId", -1)
+        if (id != -1) {
+            val send = Bundle()
+            send.putInt("routineId", id!!)
+            findNavController(R.id.nav_host_fragment).navigate(R.id.routineDetailsFragment, send)
         }
-
-        // update the notification
-        val replyIntent = Intent(this, MainActivity::class.java)
-        val replyPendingIntent = PendingIntent.getActivity(this, 0, replyIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        // recreate a new notif
-        val repliedNotification = NotificationCompat.Builder(this, CHANNELID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentText("Reply received")
-            .setContentIntent(replyPendingIntent)
-            .build()
-        notificationManager?.notify(NOTIFICATIONID, repliedNotification)
     }
-     */
 
+    // function for drawer toggle
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(toggle?.onOptionsItemSelected(item)!!)
             return true
         return super.onOptionsItemSelected(item)
+    }
+
+    // note time when app goes to foreground
+    override fun onResume() {
+        super.onResume()
+        val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val time = System.currentTimeMillis()
+        editor.putLong("lastForegroundTime", time)
+        editor.apply()
+    }
+
+    // note time when app goes to background
+    override fun onPause() {
+        super.onPause()
+        val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val editor: SharedPreferences.Editor = preferences.edit()
+        val time = System.currentTimeMillis()
+        editor.putLong("lastBackgroundTime", time)
+        editor.apply()
     }
 }
