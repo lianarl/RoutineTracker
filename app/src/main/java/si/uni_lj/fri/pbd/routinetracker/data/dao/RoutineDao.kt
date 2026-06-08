@@ -24,10 +24,10 @@ interface RoutineDao {
     fun getAllRoutines(): LiveData<List<Routine>>
 
     @Query("SELECT * FROM routines WHERE routineId = :id")
-    suspend fun getRoutine(id: Int): Routine?
+    suspend fun getRoutine(id: Long): Routine?
 
     @Query("SELECT * FROM routines WHERE routineId = :id")
-    fun getRoutineById(id: Int): LiveData<Routine?>
+    fun getRoutineById(id: Long): LiveData<Routine?>
 
     // need for the reset in settings
     @Query("DELETE FROM routines")

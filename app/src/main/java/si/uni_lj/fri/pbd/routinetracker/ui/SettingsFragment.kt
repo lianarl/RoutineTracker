@@ -20,12 +20,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
                                      rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-        //findPreference<SwitchPreferenceCompat>("notifications_key")
-        //    ?.onPreferenceChangeListener {_, newValue ->
-        //        Log.d("Preferences", "Notifications enabled: $newValue")
-        //        true // returns true if the event is handled
-        //    }
-
         // viewModel setup
         val repository = RoutineRepository.getInstance(requireContext())
         val factory = RoutineListViewModelFactory(repository)

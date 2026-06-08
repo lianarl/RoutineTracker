@@ -6,7 +6,6 @@ import android.database.Cursor
 import androidx.recyclerview.widget.RecyclerView
 import si.uni_lj.fri.pbd.routinetracker.data.entity.Routine
 import si.uni_lj.fri.pbd.routinetracker.data.entity.RoutineExecution
-import si.uni_lj.fri.pbd.routinetracker.databinding.CardLayoutBinding
 import si.uni_lj.fri.pbd.routinetracker.databinding.ExecutionHistoryBinding
 import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineAndCompletion
 

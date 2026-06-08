@@ -4,9 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import si.uni_lj.fri.pbd.routinetracker.data.entity.Routine
 import si.uni_lj.fri.pbd.routinetracker.repository.RoutineRepository
+import si.uni_lj.fri.pbd.routinetracker.rest.WeatherData
 
 // bundled routine and its completion info for easier management
 data class RoutineAndCompletion(

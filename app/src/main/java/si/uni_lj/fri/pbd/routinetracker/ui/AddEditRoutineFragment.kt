@@ -58,7 +58,7 @@ class AddEditRoutineFragment : Fragment() {
     // setup of the spinner
     // src: https://developer.android.com/develop/ui/views/components/spinner
     private fun enableChooseType() {
-        val types = arrayOf("Study", "Exercise", "Socialize")
+        val types = arrayOf("Study", "Exercise", "Socialise")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, types)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.addeditType.adapter = adapter

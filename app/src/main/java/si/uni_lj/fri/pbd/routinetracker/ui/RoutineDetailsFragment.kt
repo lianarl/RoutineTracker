@@ -5,20 +5,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.launch
 import si.uni_lj.fri.pbd.routinetracker.R
-import si.uni_lj.fri.pbd.routinetracker.RecyclerAdapter
 import si.uni_lj.fri.pbd.routinetracker.RecyclerAdapterHistory
 import si.uni_lj.fri.pbd.routinetracker.data.entity.Routine
 import si.uni_lj.fri.pbd.routinetracker.databinding.FragmentRoutineDetailsBinding
 import si.uni_lj.fri.pbd.routinetracker.repository.RoutineRepository
 import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineDetailViewModel
 import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineDetailViewModelFactory
-import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineListViewModel
-import si.uni_lj.fri.pbd.routinetracker.viewmodel.RoutineListViewModelFactory
 
 // this is just a simplification of the AddEditRoutine (+ some small adjustments to the xml) -> So just the edit part where we populate the fields
 // + the edit and delete ofcourse
@@ -53,6 +51,12 @@ class RoutineDetailsFragment : Fragment() {
         // setup for new recycler
         recyclerSetup(id)
         observerSetup(id)
+
+        // fetch info for the suggestion the moment i open the routine
+        lifecycleScope.launch {
+            val rc = viewModel.getRoutineContext(id!!.toLong(), requireContext())
+            binding.detailsSugg.text = rc.suggestion
+        }
 
         // handle edit and delete
         binding.detailsEdit.setOnClickListener {
@@ -89,7 +93,7 @@ class RoutineDetailsFragment : Fragment() {
 
         // fill days
         var routine_days = " "
-        if (!routine.days!!.isEmpty()) {
+        if (!routine.days!!.isNullOrBlank()) {
             routine_days = routine.days!!
         }
 
@@ -121,7 +125,7 @@ class RoutineDetailsFragment : Fragment() {
         binding.detailsType.setText(routine.type)
 
         // notif status
-        var notif = routine.notif
+        val notif = routine.notif
         if (notif == 1) {
             val y = "Yes" // ugly but its an easy way to stop the error
             binding.detailsNotif.setText(y)

@@ -15,6 +15,12 @@
             app:key="advanceTime_key"
             app:title="Set notification advance time"
             app:summary="How many minutes before the routine is due do you want to be notified?" />
+    <EditTextPreference
+            app:key="location_key"
+            app:title="Set location"
+            app:defaultValue="Ljubljana, Slovenia"
+            app:summary="Based on this location, the weather information will be shown"
+            />
     <Preference
             app:title="Reset the app"
             app:summary="Delete all routines and reset preferences"

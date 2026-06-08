@@ -1,10 +1,13 @@
 package si.uni_lj.fri.pbd.routinetracker.viewmodel
 
+import android.content.Context
+import androidx.compose.runtime.toLong
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import si.uni_lj.fri.pbd.routinetracker.data.RoutineContext
 import si.uni_lj.fri.pbd.routinetracker.data.entity.Routine
 import si.uni_lj.fri.pbd.routinetracker.data.entity.RoutineExecution
 import si.uni_lj.fri.pbd.routinetracker.repository.RoutineRepository
@@ -15,7 +18,7 @@ class RoutineDetailViewModel(private val repository: RoutineRepository): ViewMod
     // need to show one specific routine and its history
 
     fun getRoutineById(id: Int): LiveData<Routine?> {
-        return repository.getRoutineById(id)
+        return repository.getRoutineById(id.toLong())
     }
     fun deleteRoutine(id: Int) {
         viewModelScope.launch {
@@ -36,5 +39,9 @@ class RoutineDetailViewModel(private val repository: RoutineRepository): ViewMod
     // will also need ID to return to set alarm (because i will use the details VM for both routine detail and routine addedit)
     suspend fun insertRoutine(routine: Routine): Long {
         return repository.insertRoutine(routine)
+    }
+
+    suspend fun getRoutineContext(id: Long, context: Context): RoutineContext {
+        return repository.buildRoutineContext(id, context)
     }
 }
