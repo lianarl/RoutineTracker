@@ -32,6 +32,9 @@ It uses a single-activity setup, with one `MainActivity` hosting fragments throu
 - SensorManager for the ambient light reading
 - SharedPreferences and PreferenceFragmentCompat for settings
 
+## Screenshot of the main screen
+<img width="1080" height="2400" alt="Screenshot_20260608_111928" src="https://github.com/user-attachments/assets/b4471a5c-3a8a-479a-97b7-6517f5dbb444" />
+
 ## How to run
 
 1. Clone the repo and open it in Android Studio.
