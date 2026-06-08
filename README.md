@@ -12,7 +12,7 @@ An Android app for creating daily routines and keeping track of whether you actu
 
 ## How completion is tracked
 
-The app doesn't ask you to tick anything off. Instead, it records when it was last in the foreground and background, and an hourly background job checks whether you had the app open during a routine's time window. If you did, the routine counts as completed for that day; if the window has passed and you didn't, it's marked as missed.
+The app doesn't ask you to tick anything off. Instead, it records when it was last in the foreground and background, and an hourly background job checks whether you had the app open during a routine's time window. If you did, the routine counts as completed for that day. If the window has passed and you didn't, it's marked as missed.
 
 ## Architecture
 
